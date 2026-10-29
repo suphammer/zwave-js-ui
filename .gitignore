@@ -94,3 +94,6 @@ fakeNodes.json
 .docs-index/
 .posts-index/
 .docs-feedback/
+
+# Selected Driver source, packages and installation provenance
+/.driver-source/

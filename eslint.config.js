@@ -119,6 +119,7 @@ export default defineConfig([
 		},
 	},
 	globalIgnores([
+		'.driver-source/',
 		'build/',
 		'config/',
 		'dist/',

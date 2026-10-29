@@ -4,6 +4,7 @@
         "**/*.ts"
     ],
     "exclude": [
+        ".driver-source/**",
         "**/build/**",
         "**/node_modules/**"
     ]

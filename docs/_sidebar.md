@@ -55,6 +55,7 @@
 - Development
 
   - [Introduction](development/intro.md)
+  - [Selecting the Driver Source](development/driver-source.md)
   - [Building Custom Docker Images](development/custom-docker.md)
 
 - [Usage Statistics](usage_stats.md)

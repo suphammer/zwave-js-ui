@@ -240,6 +240,11 @@ Example MCP queries:
 -   Use npm for package management (bundled with Node.js)
 -   Install dependencies: `npm ci` -- takes ~60 seconds with network delays
 
+This branch selects its Driver source in `driver-source.json`. Use
+`npm run driver-source:bootstrap` before building or starting a Git-source
+installation; `npm ci` alone restores the published dependency baseline.
+See `docs/development/driver-source.md` for source selection and verification.
+
 ### Build Process
 
 -   **CRITICAL**: Build takes ~24 seconds total. NEVER CANCEL builds. Set timeout to 60+ minutes for safety.

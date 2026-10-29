@@ -36,6 +36,13 @@
     "README.md"
   ],
   "scripts": {
+    "driver-source:bootstrap": "node scripts/driver-source.mjs bootstrap",
+    "driver-source:verify": "node scripts/driver-source.mjs verify",
+    "predev:server": "npm run driver-source:verify",
+    "preserver": "npm run driver-source:verify",
+    "prestart": "npm run driver-source:verify",
+    "prebuild": "npm run driver-source:verify",
+    "prebundle": "npm run driver-source:verify",
     "dev": "vite",
     "dev-https": "SERVER_SSL='true' npm run dev",
     "dev:server": "nodemon",
