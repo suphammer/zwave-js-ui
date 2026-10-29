@@ -14,16 +14,17 @@ describe('#ZwaveClient', () => {
 		manufacturer: 'Suphammer',
 		product: 'Suphacap 2',
 		firmwareLabel: 'RCP controller',
-		firmwareVersion: '0.1.4',
+		firmwareVersion: '0.1.6',
 		minimumVersion: '0.1.4',
-		recommendedVersion: '0.1.5',
+		recommendedVersion: '0.1.6',
 	}
 
 	describe('controller firmware info', () => {
 		it.each([
 			['0.1.3', 'Update required'],
 			['0.1.4', 'Update recommended'],
-			['0.1.5', 'Compatible'],
+			['0.1.5', 'Update recommended'],
+			['0.1.6', 'Compatible'],
 			['0.2.0', 'Compatible'],
 			['unknown', undefined],
 		])('reports firmware %s as %s', (version, status) => {
@@ -48,15 +49,21 @@ describe('#ZwaveClient', () => {
 			expect(client.getInfo().controllerFirmwareStatus).toBeUndefined()
 		})
 
-		it.each([true, false])(
-			'uses backend branding only for the controller (own node: %s)',
-			(isControllerNode) => {
+		it.each([
+			[true, true],
+			[false, true],
+			[true, false],
+		])(
+			'uses live backend firmware and branding only for the controller (own node: %s, metadata: %s)',
+			(isControllerNode, hasFirmwareInfo) => {
 				const client = createClient()
 				const node: any = { id: 1 }
 				client['_nodes'] = new Map([[1, node]])
 				client['storeNodes'] = {}
 				client['_driver'] = {
-					controllerFirmwareInfo: controllerFirmware,
+					controllerFirmwareInfo: hasFirmwareInfo
+						? controllerFirmware
+						: undefined,
 					configManager: { lookupManufacturer: () => '_RESERVED_' },
 					controller: { getSupportedRFRegions: () => [] },
 				} as any
@@ -80,16 +87,22 @@ describe('#ZwaveClient', () => {
 					getFirmwareUpdateCapabilitiesCached: () => undefined,
 					hasDeviceConfigChanged: () => false,
 				} as any)
+				const usesControllerFirmware =
+					isControllerNode && hasFirmwareInfo
 				expect(node.manufacturer).toBe(
-					isControllerNode ? 'Suphammer' : deviceConfig.manufacturer,
+					usesControllerFirmware
+						? 'Suphammer'
+						: deviceConfig.manufacturer,
 				)
 				expect(node.productLabel).toBe(
-					isControllerNode ? 'Suphacap 2' : deviceConfig.label,
+					usesControllerFirmware ? 'Suphacap 2' : deviceConfig.label,
 				)
 				expect(node.manufacturerId).toBe(0xffff)
 				expect(node.productType).toBe(0)
 				expect(node.productId).toBe(0)
-				expect(node.firmwareVersion).toBe('0.0')
+				expect(node.firmwareVersion).toBe(
+					usesControllerFirmware ? '0.1.6' : '0.0',
+				)
 				expect(node.sdkVersion).toBe('0.0.0')
 				expect(node.deviceConfig).toBe(deviceConfig)
 			},

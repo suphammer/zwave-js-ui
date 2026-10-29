@@ -8893,7 +8893,8 @@ class ZwaveClient extends TypedEventEmitter<ZwaveClientEventCallbacks> {
 		node.productDescription = deviceConfig.description
 		node.manufacturer =
 			controllerFirmware?.manufacturer ?? deviceConfig.manufacturer
-		node.firmwareVersion = zwaveNode.firmwareVersion
+		node.firmwareVersion =
+			controllerFirmware?.firmwareVersion ?? zwaveNode.firmwareVersion
 		node.sdkVersion = zwaveNode.sdkVersion
 		node.protocolVersion = zwaveNode.protocolVersion
 		node.zwavePlusVersion = zwaveNode.zwavePlusVersion

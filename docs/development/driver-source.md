@@ -82,8 +82,11 @@ about the latest firmware available online; compatible newer versions remain
 accepted. Missing metadata leaves the normal Serial API display unchanged.
 
 For Suphacap, the version comes from the connected RCP firmware's live information
-response. It is separate from the emulated Serial API node's version and Z-Wave
-SDK version. The backend display names identify the local controller as
+response. The controller node's **Firmware** field and the toolbar info panel
+show that actual RCP version. The emulated Serial API version is unchanged, and
+the separate **SDK version** field continues to show the underlying Z-Wave SDK
+version. Other nodes retain their own reported firmware versions. The backend
+display names identify the local controller as
 **Suphammer / Suphacap 2**. They do not allocate a Z-Wave Manufacturer ID:
 `0xffff` remains an unassigned/reserved placeholder, with Product Type and Product
 ID `0`. These numeric fields are not registered as Suphammer in the shared
