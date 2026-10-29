@@ -161,6 +161,13 @@
 							<small>Z-Wave JS</small>
 							<strong>{{ appInfo.zwaveVersion }}</strong>
 						</div>
+						<div
+							v-for="detail in controllerFirmwareDetails"
+							:key="detail.label"
+						>
+							<small>{{ detail.label }}</small>
+							<strong>{{ detail.value }}</strong>
+						</div>
 						<div>
 							<small>Home ID</small>
 							<strong>{{ appInfo.homeid }}</strong>
@@ -426,6 +433,34 @@ export default {
 	mixins: [InstancesMixin],
 	name: 'app',
 	computed: {
+		controllerFirmwareDetails() {
+			const firmware = this.appInfo.controllerFirmwareInfo
+			if (!firmware) return []
+			return [
+				{
+					label: 'Controller',
+					value: `${firmware.manufacturer} ${firmware.product}`,
+				},
+				{
+					label: `${firmware.firmwareLabel} firmware`,
+					value: firmware.firmwareVersion,
+				},
+				{
+					label: 'Driver firmware minimum',
+					value:
+						firmware.minimumVersion &&
+						`>=${firmware.minimumVersion}`,
+				},
+				{
+					label: 'Driver firmware baseline',
+					value: firmware.recommendedVersion,
+				},
+				{
+					label: 'Firmware compatibility',
+					value: this.appInfo.controllerFirmwareStatus,
+				},
+			].filter(({ value }) => value)
+		},
 		...mapState(useBaseStore, [
 			'user',
 			'auth',
@@ -856,6 +891,9 @@ export default {
 		copyVersion() {
 			const el = document.createElement('textarea')
 			el.value = `zwave-js-ui: ${this.appInfo.appVersion}\nzwave-js: ${this.appInfo.zwaveVersion}\nhome id: ${this.appInfo.homeid}\nhome hex: ${this.appInfo.homeHex}`
+			for (const { label, value } of this.controllerFirmwareDetails) {
+				el.value += `\n${label.toLowerCase()}: ${value}`
+			}
 			el.setAttribute('readonly', '')
 			el.style.position = 'absolute'
 			el.style.left = '-9999px'

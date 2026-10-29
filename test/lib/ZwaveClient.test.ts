@@ -10,6 +10,92 @@ function createClient() {
 }
 
 describe('#ZwaveClient', () => {
+	const controllerFirmware = {
+		manufacturer: 'Suphammer',
+		product: 'Suphacap 2',
+		firmwareLabel: 'RCP controller',
+		firmwareVersion: '0.1.4',
+		minimumVersion: '0.1.4',
+		recommendedVersion: '0.1.5',
+	}
+
+	describe('controller firmware info', () => {
+		it.each([
+			['0.1.3', 'Update required'],
+			['0.1.4', 'Update recommended'],
+			['0.1.5', 'Compatible'],
+			['0.2.0', 'Compatible'],
+			['unknown', undefined],
+		])('reports firmware %s as %s', (version, status) => {
+			const client = createClient()
+			client['driverInfo'] = {}
+			const firmware = { ...controllerFirmware, firmwareVersion: version }
+			client['_driver'] = { controllerFirmwareInfo: firmware } as any
+			const info = client.getInfo()
+			expect(info.controllerFirmwareInfo).toEqual(firmware)
+			expect(info.controllerFirmwareStatus).toBe(status)
+		})
+
+		it('clears firmware information after the Driver is removed', () => {
+			const client = createClient()
+			client['driverInfo'] = {}
+			client['_driver'] = {
+				controllerFirmwareInfo: controllerFirmware,
+			} as any
+			expect(client.getInfo().controllerFirmwareInfo).toBeDefined()
+			client['_driver'] = undefined
+			expect(client.getInfo().controllerFirmwareInfo).toBeUndefined()
+			expect(client.getInfo().controllerFirmwareStatus).toBeUndefined()
+		})
+
+		it.each([true, false])(
+			'uses backend branding only for the controller (own node: %s)',
+			(isControllerNode) => {
+				const client = createClient()
+				const node: any = { id: 1 }
+				client['_nodes'] = new Map([[1, node]])
+				client['storeNodes'] = {}
+				client['_driver'] = {
+					controllerFirmwareInfo: controllerFirmware,
+					configManager: { lookupManufacturer: () => '_RESERVED_' },
+					controller: { getSupportedRFRegions: () => [] },
+				} as any
+				const deviceConfig = {
+					manufacturer: 'Configured manufacturer',
+					label: 'Configured product',
+					description: 'Configured description',
+				}
+				client['_dumpNode']({
+					id: 1,
+					isControllerNode,
+					manufacturerId: 0xffff,
+					productType: 0,
+					productId: 0,
+					firmwareVersion: '0.0',
+					sdkVersion: '0.0.0',
+					deviceConfig,
+					getEndpointCount: () => 0,
+					getAllEndpoints: () => [],
+					getHighestSecurityClass: () => undefined,
+					getFirmwareUpdateCapabilitiesCached: () => undefined,
+					hasDeviceConfigChanged: () => false,
+				} as any)
+				expect(node.manufacturer).toBe(
+					isControllerNode ? 'Suphammer' : deviceConfig.manufacturer,
+				)
+				expect(node.productLabel).toBe(
+					isControllerNode ? 'Suphacap 2' : deviceConfig.label,
+				)
+				expect(node.manufacturerId).toBe(0xffff)
+				expect(node.productType).toBe(0)
+				expect(node.productId).toBe(0)
+				expect(node.firmwareVersion).toBe('0.0')
+				expect(node.sdkVersion).toBe('0.0.0')
+				expect(node.deviceConfig).toBe(deviceConfig)
+			},
+		)
+	})
+
 	describe('#throttle()', () => {
 		let client: ZwaveClient
 

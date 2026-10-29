@@ -71,3 +71,21 @@ Generated source, tarballs, and installation metadata stay in `.driver-source/`;
 none belong in Git. A bootstrap lock prevents concurrent npm mutations. If a
 bootstrap process is interrupted, confirm it has exited before deleting its
 leftover `.driver-source/bootstrap.lock` and rerunning the command.
+
+## Native controller identity and firmware
+
+The selected Driver can provide optional controller firmware metadata. The info
+icon in the top toolbar shows its manufacturer, product, running firmware version,
+minimum compatible version, and the firmware baseline recommended by that Driver
+commit. Clicking the icon also copies these details. The baseline is not a claim
+about the latest firmware available online; compatible newer versions remain
+accepted. Missing metadata leaves the normal Serial API display unchanged.
+
+For Suphacap, the version comes from the connected RCP firmware's live information
+response. It is separate from the emulated Serial API node's version and Z-Wave
+SDK version. The backend display names identify the local controller as
+**Suphammer / Suphacap 2**. They do not allocate a Z-Wave Manufacturer ID:
+`0xffff` remains an unassigned/reserved placeholder, with Product Type and Product
+ID `0`. These numeric fields are not registered as Suphammer in the shared
+manufacturer or device configuration database. Included devices continue to use
+the normal Z-Wave JS configuration database and their actual reported identities.

@@ -38,6 +38,7 @@ import type {
 	OTWFirmwareUpdateProgress,
 	OTWFirmwareUpdateResult,
 	ControllerStatistics,
+	ControllerFirmwareInfo,
 	DataRate,
 	ExclusionOptions,
 	FirmwareUpdateCapabilities,
@@ -167,6 +168,8 @@ import {
 	coerce as semverCoerce,
 	gte as semverGte,
 	lte as semverLte,
+	lt as semverLt,
+	valid as semverValid,
 } from 'semver'
 import { PkgFsBindings } from './PkgFsBindings.ts'
 import { regionSupportsAutoPowerlevel } from './shared.ts'
@@ -826,6 +829,11 @@ export type ZUIDriverInfo = {
 	name?: string
 	controllerId?: number
 	newConfigVersion?: string | undefined
+	controllerFirmwareInfo?: ControllerFirmwareInfo
+	controllerFirmwareStatus?:
+		| 'Update required'
+		| 'Update recommended'
+		| 'Compatible'
 }
 
 export const ZwaveClientStatus = {
@@ -5021,6 +5029,26 @@ class ZwaveClient extends TypedEventEmitter<ZwaveClientEventCallbacks> {
 		info.appVersion = utils.getVersion()
 		info.zwaveVersion = libVersion
 		info.serverVersion = serverVersion
+		info.controllerFirmwareInfo = this._driver?.controllerFirmwareInfo
+		info.controllerFirmwareStatus = undefined
+		const firmware = info.controllerFirmwareInfo
+		if (firmware && semverValid(firmware.firmwareVersion)) {
+			const minimum =
+				firmware.minimumVersion && semverValid(firmware.minimumVersion)
+			const baseline =
+				firmware.recommendedVersion &&
+				semverValid(firmware.recommendedVersion)
+			if (minimum && semverLt(firmware.firmwareVersion, minimum)) {
+				info.controllerFirmwareStatus = 'Update required'
+			} else if (
+				baseline &&
+				semverLt(firmware.firmwareVersion, baseline)
+			) {
+				info.controllerFirmwareStatus = 'Update recommended'
+			} else if (minimum) {
+				info.controllerFirmwareStatus = 'Compatible'
+			}
+		}
 
 		return info
 	}
@@ -8858,9 +8886,13 @@ class ZwaveClient extends TypedEventEmitter<ZwaveClientEventCallbacks> {
 		node.productType = zwaveNode.productType
 		node.deviceConfig = zwaveNode.deviceConfig
 
-		node.productLabel = deviceConfig.label
+		const controllerFirmware = zwaveNode.isControllerNode
+			? this.driver.controllerFirmwareInfo
+			: undefined
+		node.productLabel = controllerFirmware?.product ?? deviceConfig.label
 		node.productDescription = deviceConfig.description
-		node.manufacturer = deviceConfig.manufacturer
+		node.manufacturer =
+			controllerFirmware?.manufacturer ?? deviceConfig.manufacturer
 		node.firmwareVersion = zwaveNode.firmwareVersion
 		node.sdkVersion = zwaveNode.sdkVersion
 		node.protocolVersion = zwaveNode.protocolVersion

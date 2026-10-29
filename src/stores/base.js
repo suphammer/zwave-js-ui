@@ -142,6 +142,8 @@ const useBaseStore = defineStore('base', {
 			serverVersion: '',
 			controllerStatus: 'Unknown',
 			newConfigVersion: undefined,
+			controllerFirmwareInfo: undefined,
+			controllerFirmwareStatus: undefined,
 		},
 		znifferState: {
 			error: '',
@@ -224,6 +226,9 @@ const useBaseStore = defineStore('base', {
 			this.appInfo.zwaveVersion = data.zwaveVersion
 			this.appInfo.serverVersion = data.serverVersion
 			this.appInfo.newConfigVersion = data.newConfigVersion
+			this.appInfo.controllerFirmwareInfo = data.controllerFirmwareInfo
+			this.appInfo.controllerFirmwareStatus =
+				data.controllerFirmwareStatus
 		},
 		setZnifferState(data) {
 			this.znifferState = {
