@@ -2,6 +2,6 @@
 	"schemaVersion": 1,
 	"source": "git",
 	"repository": "https://github.com/suphammer/zwave-js.git",
-	"commit": "87d071371aa39820b858c1f469cfcaa8ff033c28",
+	"commit": "c1867f7040d2447104a19538eb21735434ae006a",
 	"packageManager": "yarn@4.18.1"
 }
