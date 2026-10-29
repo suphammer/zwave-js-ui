@@ -540,6 +540,33 @@
 							<v-card-text>
 								<v-row>
 									<v-col cols="12" sm="6">
+										<v-select
+											v-model="controllerType"
+											:items="controllerTypes"
+											label="Controller type"
+											hint="Choose Suphacap RCP for a Suphacap running rcp-controller firmware."
+											persistent-hint
+										></v-select>
+									</v-col>
+									<v-col
+										v-if="isSuphacapController"
+										cols="12"
+										sm="6"
+									>
+										<v-text-field
+											v-model="inclusionChannel"
+											label="Inclusion channel"
+											hint="Leave blank for the region's 9.6 kbit/s channel. EU: 2 for 9.6 kbit/s, 1 for 40 kbit/s."
+											persistent-hint
+											type="number"
+											min="0"
+											max="255"
+											:rules="[
+												rules.validInclusionChannel,
+											]"
+										></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6">
 										<v-combobox
 											v-model="newZwave.port"
 											label="Serial Port"
@@ -869,6 +896,7 @@
 											<v-col
 												cols="6"
 												v-if="
+													!isSuphacapController &&
 													!isSettingManagedExternally(
 														'zwave.rf.autoPowerlevels',
 													)
@@ -885,7 +913,10 @@
 												></v-switch>
 											</v-col>
 										</v-row>
-										<v-row class="mt-0">
+										<v-row
+											v-if="!isSuphacapController"
+											class="mt-0"
+										>
 											<v-col cols="12" sm="6">
 												<v-text-field
 													v-if="
@@ -1067,6 +1098,7 @@
 											cols="12"
 											sm="6"
 											v-if="
+												!isSuphacapController &&
 												!isSettingManagedExternally(
 													'zwave.enableSoftReset',
 												)
@@ -1082,7 +1114,11 @@
 											></v-switch>
 										</v-col>
 
-										<v-col cols="12" sm="6">
+										<v-col
+											v-if="!isSuphacapController"
+											cols="12"
+											sm="6"
+										>
 											<v-switch
 												hint="Enable this to start driver in bootloader only mode, useful to recover sticks when an FW upgrade fails. When this is enabled stick will NOT be able to communicate with the network."
 												persistent-hint
@@ -1093,7 +1129,11 @@
 											></v-switch>
 										</v-col>
 
-										<v-col cols="12" sm="6">
+										<v-col
+											v-if="!isSuphacapController"
+											cols="12"
+											sm="6"
+										>
 											<inverted-checkbox
 												hint="When disabled, commands will simply fail when the controller is unresponsive and nodes may get randomly marked as dead until the controller recovers on its own."
 												persistent-hint
@@ -1103,7 +1143,11 @@
 												"
 											></inverted-checkbox>
 										</v-col>
-										<v-col cols="12" sm="6">
+										<v-col
+											v-if="!isSuphacapController"
+											cols="12"
+											sm="6"
+										>
 											<inverted-checkbox
 												persistent-hint
 												label="Watchdog"
@@ -2261,6 +2305,14 @@ import ConfigApis from '@/apis/ConfigApis'
 import { parse } from 'native-url'
 import { wait, copy, isUndef, deepEqual } from '../lib/utils'
 import {
+	controllerTypes,
+	getControllerType,
+	setControllerType,
+	getInclusionChannel,
+	setInclusionChannel,
+	validInclusionChannel,
+} from '../lib/controllerOptions'
+import {
 	settingsRfRegions,
 	znifferRegions,
 	maxLRPowerLevels,
@@ -2297,6 +2349,25 @@ export default {
 		},
 	},
 	computed: {
+		controllerType: {
+			get() {
+				return getControllerType(this.newZwave)
+			},
+			set(value) {
+				setControllerType(this.newZwave, value)
+			},
+		},
+		isSuphacapController() {
+			return this.controllerType === 'suphacap'
+		},
+		inclusionChannel: {
+			get() {
+				return getInclusionChannel(this.newZwave)
+			},
+			set(value) {
+				setInclusionChannel(this.newZwave, value)
+			},
+		},
 		internalColorScheme: {
 			get() {
 				return this.colorScheme
@@ -2505,6 +2576,7 @@ export default {
 	},
 	data() {
 		return {
+			controllerTypes,
 			rfRegions: settingsRfRegions,
 			znifferRegions,
 			maxLRPowerLevels,
@@ -2582,6 +2654,7 @@ export default {
 				},
 			],
 			rules: {
+				validInclusionChannel,
 				required: (value) => {
 					let valid = false
 

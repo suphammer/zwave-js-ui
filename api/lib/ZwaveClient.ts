@@ -30,6 +30,7 @@ import {
 	applyExternalDriverSettings,
 	getExternalDriverPresets,
 } from './externalSettings.ts'
+import { applyControllerOptions } from './controllerOptions.ts'
 import { JSONTransport } from '@zwave-js/log-transport-json'
 import type {
 	AssociationAddress,
@@ -3179,6 +3180,7 @@ class ZwaveClient extends TypedEventEmitter<ZwaveClientEventCallbacks> {
 			}
 			// init driver here because if connect fails the driver is destroyed
 			// this could throw so include in the try/catch
+			applyControllerOptions(zwaveOptions, this.cfg.options)
 			this._driver = new Driver(
 				this.cfg.port,
 				zwaveOptions,

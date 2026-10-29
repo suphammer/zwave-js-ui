@@ -80,6 +80,8 @@ NVM:
 
 ## Z-Wave
 
+- **Controller type**: Use **Serial API** for normal Z-Wave USB controllers, or **Suphacap RCP** for Suphacap running `rcp-controller` firmware. The serial-port field points directly to the selected controller.
+- **Inclusion channel** (Suphacap): Leave blank to use the region's 9.6 kbit/s channel. For EU Classic inclusion, logical channel `2` selects 9.6 kbit/s; `1` selects 40 kbit/s for joining controllers such as the tested UZB. The channel must exist in the configured RF region.
 - **Serial port**: The serial port where your controller is connected. This input allows to insert custom values, if your port is not listed or you are using tools like [ser2net](https://github.com/cminyard/ser2net) to make it available throught TCP just write the port path and press enter.
 - **Security Keys** : Z-Wave network keys for secure inclusion S0/S2. You can manually input them or auto-generate them by using random generator button or by pasting your OZW keys in the input, they will be auto-converted in the correct format. Example of a valid key is: `5C14897467C42598518AF155DE6CCEA8` (length is 32).
   - **S0_Legacy** : Legacy S0 key
@@ -125,6 +127,42 @@ NVM:
 
 - **Hidden settings**: Advanced settings not visible to the user interface, you can edit these by setting in the `settings.json` file you fins in store directory
   - `zwave.options` overrides options passed to the Z-Wave JS Driver constructor [ZWaveOptions](https://zwave-js.github.io/node-zwave-js/#/api/driver?id=zwaveoptions)
+
+### Suphacap controller
+
+Use a Driver build containing native Suphacap support. During fork development,
+follow the [Driver source workflow](../development/driver-source.md) before
+building and starting the UI.
+
+The controller selector is stored in `zwave.options.controller`, so the UI and
+advanced Driver options use the same setting. For example:
+
+```json
+{
+	"zwave": {
+		"port": "/dev/ttyUSB0",
+		"options": {
+			"controller": {
+				"type": "suphacap"
+			}
+		}
+	}
+}
+```
+
+Suphacap uses the normal RF-region, network-key, device-configuration and store
+settings. Its controller identity and included nodes are persisted by the
+Driver in the same store. Choose a separate store when testing a different
+controller or network.
+
+Soft reset, controller recovery, watchdog, Serial API bootloader controls and
+power calibration are hidden for Suphacap. The Driver's unsupported firmware
+features are disabled automatically; explicit `options.features` overrides that
+enable them are rejected. Automatic/calibrated power and Long Range power
+options are not applied; the radio retains its existing power setting.
+Initial physical validation covers unsecured EU Classic inclusion,
+NIF discovery and acknowledged NOPs. Full device interviews and secure inclusion
+require their own hardware validation.
 
 ## Disable Gateway
 
