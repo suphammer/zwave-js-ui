@@ -11,6 +11,7 @@ import {
 	mdiBattery,
 	mdiBatteryUnknown,
 	mdiCheckCircle,
+	mdiCloud,
 	mdiEmoticon,
 	mdiEmoticonDead,
 	mdiHelpCircle,
@@ -20,6 +21,7 @@ import {
 	mdiPlusCircle,
 	mdiPowerPlug,
 	mdiSleep,
+	mdiSitemap,
 	mdiZWave,
 } from '@mdi/js'
 import useBaseStore from '../../stores/base.js'
@@ -142,17 +144,17 @@ export default {
 					richValue: (node) =>
 						this.booleanRichValue(node.virtual, {
 							true: {
-								icon: 'cloud',
+								icon: mdiCloud,
 								iconStyle: 'color: purple',
 								description: 'Virtual Node',
 							},
 							false: {
-								icon: 'device_hub',
+								icon: mdiSitemap,
 								iconStyle: 'color: green',
 								description: 'Physical Node',
 							},
 							default: {
-								icon: 'device_hub',
+								icon: mdiSitemap,
 								iconStyle: 'color: green',
 								description: 'Physical Node',
 							},
